@@ -9,7 +9,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const AuthX = require('../../src'); // In real usage: require('express-auth-toolkit')
+const AuthX = require('../../src'); // In real usage: require('AuthX')
 
 // Create Express app
 const app = express();
