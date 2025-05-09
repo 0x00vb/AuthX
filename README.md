@@ -1,4 +1,5 @@
 # Express Auth Toolkit
+![image](https://github.com/user-attachments/assets/a535e585-4e59-4b99-ae14-e5625bef67c9)
 
 [![npm version](https://img.shields.io/npm/v/express-auth-toolkit.svg)](https://www.npmjs.com/package/express-auth-toolkit)
 [![License](https://img.shields.io/npm/l/express-auth-toolkit.svg)](https://github.com/yourusername/express-auth-toolkit/blob/main/LICENSE)
