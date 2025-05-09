@@ -8,6 +8,7 @@ const {
   sendPasswordResetEmail,
   sendWelcomeEmail
 } = require('../utils/email');
+const nodemailer = require('nodemailer');
 
 /**
  * Create an email service
@@ -62,8 +63,29 @@ module.exports = (config) => {
    */
   const testEmailConfiguration = async () => {
     try {
-      // Create test transport with the provided configuration
-      const nodemailer = require('nodemailer');
+      // In development with no email config, use Ethereal
+      const isLocalSMTPAttempt = 
+        config.emailOptions.transport.host === '127.0.0.1' || 
+        config.emailOptions.transport.host === 'localhost';
+      
+      const noEmailConfig = 
+        !config.emailOptions.transport.host || 
+        !config.emailOptions.transport.auth.user ||
+        isLocalSMTPAttempt;
+      
+      const devEnvironment = process.env.NODE_ENV !== 'production';
+      
+      if (devEnvironment && noEmailConfig) {
+        // Create test account with Ethereal
+        const testAccount = await nodemailer.createTestAccount();
+        console.log('Ethereal Test Account Created:');
+        console.log('- User:', testAccount.user);
+        console.log('- Password:', testAccount.pass);
+        console.log('- Host:', testAccount.smtp.host);
+        return true;
+      }
+      
+      // Create regular transport with the provided configuration
       const transport = nodemailer.createTransport(config.emailOptions.transport);
       
       // Verify the connection

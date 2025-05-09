@@ -57,8 +57,8 @@ module.exports = (config, services, middlewares) => {
         if (config.useSessionCookies && tokens.refreshToken) {
           res.cookie('refreshToken', tokens.refreshToken, {
             httpOnly: true,
-            secure: config.cookieOptions.secure,
-            sameSite: config.cookieOptions.sameSite,
+            secure: config.cookieOptions?.secure || false,
+            sameSite: config.cookieOptions?.sameSite || 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
           });
         }
@@ -101,13 +101,24 @@ module.exports = (config, services, middlewares) => {
         // Login user
         const { user, tokens } = await services.auth.login(email, password);
         
-        // Set refresh token in cookie if using session cookies
-        if (config.useSessionCookies && tokens.refreshToken) {
-          res.cookie('refreshToken', tokens.refreshToken, {
+        // Set tokens in cookies if using session cookies
+        if (config.useSessionCookies) {
+          // Set refresh token cookie
+          if (tokens.refreshToken) {
+            res.cookie('refreshToken', tokens.refreshToken, {
+              httpOnly: true,
+              secure: config.cookieOptions?.secure || false,
+              sameSite: config.cookieOptions?.sameSite || 'lax',
+              maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            });
+          }
+          
+          // Also set access token cookie (needed for authentication)
+          res.cookie('accessToken', tokens.accessToken, {
             httpOnly: true,
-            secure: config.cookieOptions.secure,
-            sameSite: config.cookieOptions.sameSite,
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            secure: config.cookieOptions?.secure || false,
+            sameSite: config.cookieOptions?.sameSite || 'lax',
+            maxAge: 15 * 60 * 1000 // 15 minutes (matching default token expiry)
           });
         }
         
@@ -201,8 +212,8 @@ module.exports = (config, services, middlewares) => {
       if (config.useSessionCookies && tokens.refreshToken) {
         res.cookie('refreshToken', tokens.refreshToken, {
           httpOnly: true,
-          secure: config.cookieOptions.secure,
-          sameSite: config.cookieOptions.sameSite,
+          secure: config.cookieOptions?.secure || false,
+          sameSite: config.cookieOptions?.sameSite || 'lax',
           maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
       }
@@ -374,9 +385,11 @@ module.exports = (config, services, middlewares) => {
     middlewares.validate2FA,
     async (req, res, next) => {
       try {
-        // User is already attached to req by requireAuth middleware
+        // Get complete user data from the service
+        const user = await services.user.getUserById(req.user.id);
+        
         res.json({
-          user: req.user
+          user
         });
       } catch (error) {
         next(error);

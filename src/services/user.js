@@ -74,6 +74,11 @@ module.exports = (config, adapter) => {
       delete updates.role;
     }
     
+    // For tests, if email is being updated, handle verification flag
+    if (updates.email && config.requireEmailVerification) {
+      updates.isVerified = false;
+    }
+    
     const updatedUser = await adapter.updateUser(id, updates);
     if (!updatedUser) {
       throw new UserNotFoundError();
@@ -93,36 +98,58 @@ module.exports = (config, adapter) => {
    * @returns {Promise<boolean>} - Password change success
    */
   const changePassword = async (id, currentPassword, newPassword) => {
+    // Validate new password first
+    const passwordValidation = validatePasswordStrength(newPassword, config.passwordPolicy);
+    if (!passwordValidation.isValid) {
+      throw new ValidationError(passwordValidation.errors);
+    }
+    
     // Get user with password
     const user = await adapter.getUserById(id);
     if (!user) {
       throw new UserNotFoundError();
     }
     
-    // Verify current password
-    const isValid = await verifyPassword(currentPassword, user.password);
-    if (!isValid) {
-      throw new InvalidCredentialsError('Current password is incorrect');
+    // Check if user has a password set (for password comparison)
+    if (!user.password) {
+      throw new InvalidCredentialsError('Password is not set for this user');
     }
     
-    // Validate new password
-    const passwordValidation = validatePasswordStrength(newPassword, config.passwordPolicy);
-    if (!passwordValidation.isValid) {
-      throw new ValidationError(passwordValidation.errors);
+    try {
+      // Verify current password
+      const isValid = await verifyPassword(currentPassword, user.password);
+      if (!isValid) {
+        throw new InvalidCredentialsError('Current password is incorrect');
+      }
+      
+      // Hash new password
+      const hashedPassword = await hashPassword(newPassword);
+      
+      // Update user
+      await adapter.updateUser(id, { password: hashedPassword });
+      
+      // Invalidate existing refresh tokens
+      if (config.useRefreshTokens) {
+        await adapter.deleteUserRefreshTokens(id);
+      }
+      
+      return true;
+    } catch (error) {
+      if (error instanceof InvalidCredentialsError || error instanceof ValidationError) {
+        throw error;
+      }
+      
+      // If it's a bcrypt error, provide a more helpful message
+      if (error.message && (
+          error.message.includes('data and hash arguments required') ||
+          error.message.includes('Illegal arguments') ||
+          error.message.includes('Invalid salt')
+        )) {
+        throw new InvalidCredentialsError('Password verification failed: Invalid password format');
+      }
+      
+      throw error;
     }
-    
-    // Hash new password
-    const hashedPassword = await hashPassword(newPassword);
-    
-    // Update user
-    await adapter.updateUser(id, { password: hashedPassword });
-    
-    // Invalidate existing refresh tokens
-    if (config.useRefreshTokens) {
-      await adapter.deleteUserRefreshTokens(id);
-    }
-    
-    return true;
   };
   
   /**
@@ -262,27 +289,28 @@ module.exports = (config, adapter) => {
    * @returns {Promise<boolean>} - Password reset success
    */
   const resetPassword = async (token, newPassword) => {
+    // Validate password first
+    const passwordValidation = validatePasswordStrength(newPassword, config.passwordPolicy);
+    if (!passwordValidation.isValid) {
+      throw new ValidationError(passwordValidation.errors);
+    }
+    
     // Get password reset token
     const resetToken = await adapter.getPasswordResetToken(token);
     if (!resetToken) {
       throw new InvalidTokenError('Invalid or expired password reset token');
     }
     
-    // Validate new password
-    const passwordValidation = validatePasswordStrength(newPassword, config.passwordPolicy);
-    if (!passwordValidation.isValid) {
-      throw new ValidationError(passwordValidation.errors);
+    // Get user
+    const user = await adapter.getUserById(resetToken.userId);
+    if (!user) {
+      throw new UserNotFoundError();
     }
     
     // Hash new password
     const hashedPassword = await hashPassword(newPassword);
     
     // Update user
-    const user = await adapter.getUserById(resetToken.userId);
-    if (!user) {
-      throw new UserNotFoundError();
-    }
-    
     await adapter.updateUser(user.id, { password: hashedPassword });
     
     // Delete password reset token

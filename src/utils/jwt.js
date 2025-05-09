@@ -105,8 +105,16 @@ const extractTokenFromRequest = (req, config) => {
   }
   
   // Check cookies if session cookies are enabled
-  if (config.useSessionCookies && req.cookies && req.cookies.accessToken) {
-    return req.cookies.accessToken;
+  if (config.useSessionCookies && req.cookies) {
+    // Check for accessToken cookie first
+    if (req.cookies.accessToken) {
+      return req.cookies.accessToken;
+    }
+    
+    // Also check for token cookie (for compatibility)
+    if (req.cookies.token) {
+      return req.cookies.token;
+    }
   }
   
   // Check query parameters as a last resort

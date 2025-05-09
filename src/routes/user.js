@@ -35,6 +35,27 @@ module.exports = (config, services, middlewares) => {
       }
     }
   );
+
+  /**
+   * @route GET /users/me
+   * @description Get user profile (alternative endpoint)
+   * @access Private
+   */
+  router.get(
+    '/me',
+    middlewares.requireAuth,
+    middlewares.validate2FA,
+    async (req, res, next) => {
+      try {
+        // Get user profile
+        const user = await services.user.getUserById(req.user.id);
+        
+        res.json({ user });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
   
   /**
    * @route PUT /users/profile
@@ -91,6 +112,22 @@ module.exports = (config, services, middlewares) => {
           message: 'Password changed successfully' 
         });
       } catch (error) {
+        // Handle specific errors with appropriate status codes
+        if (error.name === 'InvalidCredentialsError') {
+          return res.status(401).json({
+            error: {
+              message: error.message || 'Invalid credentials'
+            }
+          });
+        } else if (error.name === 'ValidationError') {
+          return res.status(400).json({
+            error: {
+              message: error.message || 'Validation error',
+              details: error.details
+            }
+          });
+        }
+
         next(error);
       }
     }
@@ -103,6 +140,52 @@ module.exports = (config, services, middlewares) => {
    */
   router.delete(
     '/account',
+    middlewares.requireAuth,
+    middlewares.validate2FA,
+    async (req, res, next) => {
+      try {
+        // Delete user account
+        await services.user.deleteUser(req.user.id);
+        
+        res.json({ 
+          message: 'Account deleted successfully' 
+        });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  /**
+   * @route DELETE /users/me
+   * @description Delete user account (alternative endpoint)
+   * @access Private
+   */
+  router.delete(
+    '/me',
+    middlewares.requireAuth,
+    middlewares.validate2FA,
+    async (req, res, next) => {
+      try {
+        // Delete user account
+        await services.user.deleteUser(req.user.id);
+        
+        res.json({ 
+          message: 'Account deleted successfully' 
+        });
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  /**
+   * @route DELETE /user
+   * @description Delete user account (alternative endpoint)
+   * @access Private
+   */
+  router.delete(
+    '/',
     middlewares.requireAuth,
     middlewares.validate2FA,
     async (req, res, next) => {
