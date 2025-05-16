@@ -1,17 +1,9 @@
 /**
- * Database adapters index file
- * Export adapter interfaces and implementations
+ * Database Adapters
  */
 
-const memoryAdapter = require('./memory');
-const mongoAdapter = require('./mongo');
-const sqlAdapter = require('./sql');
+const MongooseAdapter = require('./mongoose');
 
 module.exports = {
-  memory: memoryAdapter,
-  mongo: mongoAdapter,
-  sql: sqlAdapter,
-  
-  // Export the adapter interface for custom implementations
-  AdapterInterface: require('./interface')
+  MongooseAdapter,
 }; 

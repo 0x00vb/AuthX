@@ -1,22 +1,13 @@
 /**
- * Utilities index file
- * Export all utility functions
+ * Utilities Index
  */
 
-const jwtUtils = require('./jwt');
 const passwordUtils = require('./password');
-const errors = require('./errors');
-const validators = require('./validators');
-const emailUtils = require('./email');
-const twoFactorAuthUtils = require('./twoFactorAuth');
-const templateUtils = require('./template');
+const tokenUtils = require('./token');
+const errorUtils = require('./error');
 
 module.exports = {
-  ...jwtUtils,
-  ...passwordUtils,
-  ...errors,
-  ...validators,
-  ...emailUtils,
-  ...twoFactorAuthUtils,
-  ...templateUtils
+  password: passwordUtils,
+  token: tokenUtils,
+  error: errorUtils,
 }; 

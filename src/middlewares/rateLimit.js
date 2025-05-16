@@ -1,97 +1,93 @@
 /**
- * Rate limiting middleware
- * Prevents brute force attacks by limiting request frequency
+ * Rate Limiting Middleware
  */
-const expressRateLimit = require('express-rate-limit');
-const { RateLimitError } = require('../utils/errors');
+const rateLimit = require('express-rate-limit');
 
-/**
- * Create rate limiting middleware
- * @param {Object} config - Configuration object
- * @returns {Object} - Rate limiting middleware factory functions
- */
-module.exports = (config) => {
-  // Default rate limiting options
-  const defaultOptions = {
-    login: {
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 5, // 5 attempts
-      skipSuccessfulRequests: true
-    },
-    register: {
-      windowMs: 60 * 60 * 1000, // 1 hour
-      max: 3, // 3 attempts
-      skipSuccessfulRequests: true
-    },
-    passwordReset: {
-      windowMs: 60 * 60 * 1000, // 1 hour
-      max: 3, // 3 attempts
-      skipSuccessfulRequests: true
-    }
-  };
-
-  // Initialize rate limit options safely
-  const rateLimitOptions = config.rateLimitOptions || {};
-  
+const rateLimitMiddleware = {
   /**
-   * Create a rate limiter
-   * @param {Object} options - Rate limiting options
-   * @returns {Function} - Express middleware function
+   * Create rate limiter
+   * @param {Object} options - Rate limiter options
+   * @returns {Function} Express middleware
    */
-  const createRateLimiter = (options = {}) => {
-    return expressRateLimit({
-      windowMs: options.windowMs || 15 * 60 * 1000, // Default: 15 minutes
-      max: options.max || 5, // Default: 5 attempts
-      standardHeaders: true,
-      legacyHeaders: false,
-      skipSuccessfulRequests: options.skipSuccessfulRequests || false,
-      skip: options.skip || (() => false),
+  createLimiter: (options = {}) => {
+    return rateLimit({
+      windowMs: options.windowMs || 15 * 60 * 1000, // 15 minutes default
+      max: options.max || 100, // 100 requests per windowMs by default
+      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+      legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+      message: options.message || 'Too many requests, please try again later.',
       handler: (req, res, next, options) => {
-        // Return JSON error
-        res.status(429).json({
-          error: {
-            name: 'RateLimitError',
-            message: options.message || 'Too many requests, please try again later'
-          }
+        res.status(options.statusCode).json({
+          message: options.message,
         });
       },
-      ...options
+      skip: (req) => {
+        // Skip rate limiting for specific users or conditions if needed
+        if (options.skipCondition && options.skipCondition(req)) {
+          return true;
+        }
+        return false;
+      },
     });
-  };
-  
-  // Safely define the rate limiters with defaults if config options missing
-  const loginOptions = rateLimitOptions.login || 
-    { windowMs: rateLimitOptions.loginWindow, max: rateLimitOptions.loginMax } || 
-    defaultOptions.login;
-  
-  const registerOptions = rateLimitOptions.register || 
-    { windowMs: rateLimitOptions.registrationWindow, max: rateLimitOptions.registrationMax } || 
-    defaultOptions.register;
-  
-  const passwordResetOptions = rateLimitOptions.passwordReset || 
-    { windowMs: rateLimitOptions.passwordResetWindow, max: rateLimitOptions.passwordResetMax } || 
-    defaultOptions.passwordReset;
-  
-  // Login rate limiter
-  const login = createRateLimiter(loginOptions);
-  
-  // Registration rate limiter
-  const register = createRateLimiter(registerOptions);
-  
-  // Password reset rate limiter
-  const passwordReset = createRateLimiter(passwordResetOptions);
-  
+  },
+
   /**
-   * Generic rate limiter factory
-   * @param {Object} options - Rate limiting options
-   * @returns {Function} - Express middleware function
+   * Authentication rate limiter (for login, registration, etc.)
+   * @param {Object} config - AuthX configuration
+   * @returns {Function} Express middleware
    */
-  const generic = (options) => createRateLimiter(options);
-  
-  return {
-    login,
-    register,
-    passwordReset,
-    generic
-  };
-}; 
+  auth: (config) => {
+    return rateLimit({
+      windowMs: config.security.rateLimit.windowMs,
+      max: config.security.rateLimit.max,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: 'Too many authentication attempts, please try again later.',
+      handler: (req, res) => {
+        res.status(429).json({
+          message: 'Too many authentication attempts, please try again later.',
+        });
+      },
+    });
+  },
+
+  /**
+   * Password reset rate limiter
+   * @returns {Function} Express middleware
+   */
+  passwordReset: () => {
+    return rateLimit({
+      windowMs: 60 * 60 * 1000, // 1 hour
+      max: 5, // 5 requests per hour
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: 'Too many password reset attempts, please try again later.',
+      handler: (req, res) => {
+        res.status(429).json({
+          message: 'Too many password reset attempts, please try again later.',
+        });
+      },
+    });
+  },
+
+  /**
+   * Email verification rate limiter
+   * @returns {Function} Express middleware
+   */
+  emailVerification: () => {
+    return rateLimit({
+      windowMs: 60 * 60 * 1000, // 1 hour
+      max: 5, // 5 requests per hour
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: 'Too many email verification attempts, please try again later.',
+      handler: (req, res) => {
+        res.status(429).json({
+          message: 'Too many email verification attempts, please try again later.',
+        });
+      },
+    });
+  },
+};
+
+module.exports = rateLimitMiddleware; 

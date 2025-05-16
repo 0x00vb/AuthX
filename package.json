@@ -1,93 +1,40 @@
 {
-  "name": "express-auth-toolkit",
-  "version": "0.1.0",
-  "description": "A comprehensive authentication toolkit for Express.js applications",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "bin": {
-    "express-auth-toolkit": "./lib/cli/index.js"
-  },
-  "files": [
-    "lib/**/*"
-  ],
-  "directories": {
-    "example": "examples",
-    "test": "test"
-  },
+  "name": "authx",
+  "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "test:auth": "jest tests/auth.test.js",
-    "test:user": "jest tests/user.test.js",
-    "test:2fa": "jest tests/2fa.test.js",
-    "test:all": "node tests/run-tests.js",
-    "lint": "eslint .",
-    "format": "prettier --write \"**/*.js\"",
-    "dev": "nodemon src/index.js",
-    "build": "mkdir -p lib && cp -r src/* lib/",
-    "prepublishOnly": "npm run build",
-    "start:example": "node examples/basic/server.js",
-    "start:dev": "node dev-server.js",
-    "start": "react-scripts start"
-  },
-  "keywords": [
-    "express",
-    "authentication",
-    "jwt",
-    "auth",
-    "oauth",
-    "2fa",
-    "security"
-  ],
-  "author": "",
-  "license": "MIT",
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "ejs": "^3.1.10",
-    "express": "^4.0.0 || ^5.0.0",
-    "express-rate-limit": "^7.5.0",
-    "express-validator": "^7.2.1",
-    "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0",
-    "nodemailer": "^7.0.3",
-    "otplib": "^12.0.1",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-jwt": "^4.0.1",
-    "passport-local": "^1.0.0",
-    "qrcode": "^1.5.4",
-    "smtp-server": "^3.13.6",
-    "uuid": "^11.1.0"
-  },
-  "devDependencies": {
-    "eslint": "^8.56.0",
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.3",
-    "prettier": "^3.2.5",
-    "speakeasy": "^2.0.0",
-    "supertest": "^6.3.3"
-  },
-  "peerDependencies": {
-    "express": "^4.0.0 || ^5.0.0"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testTimeout": 30000,
-    "collectCoverage": true,
-    "coverageDirectory": "coverage",
-    "verbose": true
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/express-auth-toolkit.git"
+    "url": "git+https://github.com/0x00vb/AuthX.git"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yourusername/express-auth-toolkit/issues"
+    "url": "https://github.com/0x00vb/AuthX/issues"
   },
-  "homepage": "https://github.com/yourusername/express-auth-toolkit#readme"
+  "homepage": "https://github.com/0x00vb/AuthX#readme",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.14.3",
+    "nodemailer": "^7.0.3",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.15.18",
+    "eslint": "^9.26.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.8.3"
+  }
 }
