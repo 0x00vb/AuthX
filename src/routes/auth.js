@@ -2,6 +2,7 @@
  * Authentication Routes
  */
 const express = require('express');
+const middlewares = require('../middlewares');
 
 /**
  * Create authentication router
@@ -12,7 +13,7 @@ const express = require('express');
 const createAuthRouter = (authX, services) => {
   const router = express.Router();
   const { AuthService } = services;
-  const { auth: authMiddleware, rateLimit } = authX.middlewares;
+  const { auth: authMiddleware, rateLimit } = middlewares;
 
   // Apply rate limiting to authentication routes
   router.use(rateLimit.auth(authX));

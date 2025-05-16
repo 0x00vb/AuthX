@@ -7,7 +7,7 @@ const TokenModel = require('../models/mongoose/token');
 
 class MongooseAdapter {
   constructor(options = {}) {
-    this.uri = options.uri || process.env.MONGODB_URI || 'mongodb://localhost:27017/authx';
+    this.uri = options.uri || process.env.MONGODB_URI || 'mongodb://mongo:27017/authx';
     this.options = options.mongooseOptions || {
       useNewUrlParser: true,
       useUnifiedTopology: true,

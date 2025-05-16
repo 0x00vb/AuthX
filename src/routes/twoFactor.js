@@ -2,6 +2,7 @@
  * Two-Factor Authentication Routes
  */
 const express = require('express');
+const middlewares = require('../middlewares');
 
 /**
  * Create 2FA router
@@ -12,7 +13,7 @@ const express = require('express');
 const create2FARouter = (authX, services) => {
   const router = express.Router();
   const { TwoFactorService } = services;
-  const { auth: authMiddleware } = authX.middlewares;
+  const { auth: authMiddleware } = middlewares;
 
   // All 2FA routes require authentication
   router.use(authMiddleware.verifyToken(authX));

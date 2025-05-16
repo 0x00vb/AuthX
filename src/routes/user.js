@@ -2,6 +2,7 @@
  * User Routes
  */
 const express = require('express');
+const middlewares = require('../middlewares');
 
 /**
  * Create user router
@@ -12,7 +13,7 @@ const express = require('express');
 const createUserRouter = (authX, services) => {
   const router = express.Router();
   const { UserService } = services;
-  const { auth: authMiddleware } = authX.middlewares;
+  const { auth: authMiddleware } = middlewares;
 
   // All user routes require authentication
   router.use(authMiddleware.verifyToken(authX));

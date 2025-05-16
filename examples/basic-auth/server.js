@@ -5,7 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const { AuthX, middlewares } = require('../../src');
+const { AuthX, middlewares, services } = require('../../src');
 const { MongooseAdapter } = require('../../src/adapters');
 
 // Initialize Express app
@@ -20,43 +20,44 @@ app.use(cors());
 
 // Create database adapter
 const dbAdapter = new MongooseAdapter({
-  uri: process.env.MONGODB_URI,
+  uri: 'mongodb://mongo:27017/authx',
 });
 
 // Create AuthX instance
 const authX = new AuthX({
   dbAdapter,
-  accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
-  refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
-  useEmailVerification: true,
+  accessTokenSecret: "supersecret123",
+  refreshTokenSecret: "refreshsecret456",
+  useEmailVerification: false,
   useCookies: true,
 });
 
 // Initialize services
-const authService = new authX.services.AuthService({
+const authService = new services.AuthService({
   dbAdapter,
   config: authX,
-  tokenService: new authX.services.TokenService({ dbAdapter }),
-  emailService: new authX.services.EmailService({ config: authX }),
+  tokenService: new services.TokenService({ dbAdapter }),
+  emailService: new services.EmailService({ config: authX }),
 });
 
-const userService = new authX.services.UserService({
+const userService = new services.UserService({
   dbAdapter,
 });
 
-const twoFactorService = new authX.services.TwoFactorService({
+const twoFactorService = new services.TwoFactorService({
   dbAdapter,
   config: authX,
 });
 
-const services = {
+const servicesBundle = {
   AuthService: authService,
   UserService: userService,
   TwoFactorService: twoFactorService,
 };
 
 // Initialize AuthX and mount routes
-app.use('/api', authX.routes(authX, services));
+const createRouter = require('../../src/routes');
+app.use('/api', createRouter(authX, servicesBundle));
 
 // Protected route example
 app.get('/api/protected', 
