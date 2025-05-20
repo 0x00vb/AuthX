@@ -15,7 +15,7 @@ app.use(cors());
 // Initialize AuthX with PostgreSQL
 const authX = new AuthX({
   dbType: 'postgres',
-  dbUri: process.env.DB_URI || 'postgresql://postgres:Valentino@localhost:5432/authx_demo',
+  dbUri: process.env.DB_URI || 'postgresql://postgres:Valentino@localhost:5432/authx',
   jwtSecret: process.env.JWT_SECRET || 'authx-demo-jwt-secret',
   jwtExpiresIn: '1h',
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET || 'authx-demo-refresh-secret',
