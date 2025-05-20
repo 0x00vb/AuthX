@@ -1,0 +1,77 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor AI Development Rules for Auth Package
+
+## 🧱 Architecture & Structure
+1. Follow the folder structure exactly:
+   - `src/adapters/`: DB/email abstraction layers
+   - `src/controllers/`: Handles route logic only (no business logic)
+   - `src/middleware/`: JWT auth, role checks, validation
+   - `src/models/`: Data schemas/interfaces for users, roles, sessions
+   - `src/routes/`: Route definitions only
+   - `src/services/`: Business logic for auth, users, roles
+   - `src/utils/`: Token generation, hashing, email templates
+   - `src/config/`: Configuration for DB, env, JWT, etc.
+   - `src/index.ts`: Express app bootstrapper
+   - `tests/`: Unit and integration tests organized by module
+
+## 💻 Tech Stack
+- Language: **TypeScript**
+- Framework: **Express.js**
+- Compatibility: Package must support **JavaScript and TypeScript projects**
+- DBs: Use DB adapters to support **MongoDB**, **PostgreSQL**, and **MySQL**
+- Testing: Use **Jest** for unit/integration testing
+
+## 🔐 Security Best Practices
+1. Use **bcrypt** for password hashing
+2. Use **JWT** with expiration + refresh strategy
+3. Sanitize all inputs and escape output
+4. Enforce **rate limiting** on auth routes
+5. Apply **role-based access control** middleware
+
+## 🔁 Development Rules
+- Controllers call services, never handle business logic
+- Services are DB-agnostic and call adapters for data
+- No logic inside route files — just import controllers
+- All errors must use a centralized error handler with standardized responses
+- Include **comments and JSDoc** on public functions for docs
+- All exported methods should be named exports (not default)
+- Every folder/module must include a `README.md` explaining its purpose
+
+## 🌐 Extensibility Rules
+- Allow developers to define **custom roles** via config or during setup
+- Add helper to inject custom validators or middleware
+- Keep all hardcoded values in `config/` or `.env`
+
+## 🧪 Testing Rules
+- Every service function must have a **unit test**
+- All routes must have **integration tests** using Supertest
+- Use **mocked adapters** for unit tests
+- Provide test command: `npm run test`
+
+## 📦 Packaging Rules
+- Use **tsup** or **esbuild** to bundle for JavaScript/TypeScript compatibility
+- Build output should go to `dist/` and include types
+- Export main functionality from `src/index.ts`
+- Include a sample `.env.example`
+- Include `README.md` with install, setup, config, and usage
+
+## ✅ MVP Features
+- [x] Register
+- [x] Login
+- [x] Forgot Password (email token)
+- [x] Reset Password
+- [x] Role-based Access
+- [x] Multiple DB support
+- [x] JWT + Refresh Token support
+- [x] Custom role injection
+- [x] Clean test suite
+
+## 📄 Deliverables Per Feature
+Each feature must include:
+- Routes → Controller → Service → Adapter
+- Unit + integration tests
+- Inline comments and folder-level README
