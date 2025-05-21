@@ -9,6 +9,7 @@ export interface DbAdapter {
     getUserByEmail(email: string): Promise<User | null>;
     updateUser(id: string, data: UserUpdateInput): Promise<User>;
     deleteUser(id: string): Promise<boolean>;
+    findAllUsers(): Promise<User[]>;
     createRole(role: RoleCreateInput): Promise<Role>;
     getRoleById(id: string): Promise<Role | null>;
     getRoleByName(name: string): Promise<Role | null>;

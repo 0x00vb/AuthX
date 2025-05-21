@@ -1,5 +1,7 @@
 export type DatabaseType = 'mongodb' | 'postgres' | 'mysql';
 
+import { UserExtensionConfig } from '../models/user';
+
 export interface AuthXConfig {
   // Server configuration
   port: number;
@@ -30,4 +32,7 @@ export interface AuthXConfig {
   // Roles
   roles: string[];
   defaultRole: string;
+  
+  // Custom User Model Extensions
+  userExtensions?: UserExtensionConfig;
 } 

@@ -130,6 +130,24 @@ class MongoDbAdapter {
         const result = await this.usersCollection.deleteOne({ _id: new mongodb_1.ObjectId(id) });
         return result.deletedCount === 1;
     }
+    /**
+     * Find all users in the system
+     */
+    async findAllUsers() {
+        if (!this.usersCollection) {
+            await this.connect();
+        }
+        try {
+            const users = await this.usersCollection.find()
+                .sort({ createdAt: -1 })
+                .toArray();
+            return users.map(user => this.mapUserFromDb(user));
+        }
+        catch (error) {
+            console.error('Error finding all users:', error);
+            return [];
+        }
+    }
     // Role operations
     /**
      * Create a new role

@@ -1,12 +1,12 @@
 import { AuthXConfig } from '../../config/types';
-import { User, UserCreateInput, UserUpdateInput, Role, RoleCreateInput, RoleUpdateInput } from '../../models';
+import { User, UserCreateInput, UserUpdateInput, Role, RoleCreateInput, RoleUpdateInput, CustomUserFields } from '../../models';
 import { DbAdapter } from './adapter';
 import mysql from 'mysql2/promise';
 
 /**
  * MySQL adapter implementation
  */
-export class MySqlAdapter implements DbAdapter {
+export class MySqlAdapter<T extends CustomUserFields = {}> implements DbAdapter<T> {
   private config: AuthXConfig;
   private pool: mysql.Pool | null = null;
   
@@ -302,6 +302,26 @@ export class MySqlAdapter implements DbAdapter {
     } catch (error) {
       console.error('Error deleting user:', error);
       return false;
+    }
+  }
+  
+  /**
+   * Find all users in the system
+   */
+  async findAllUsers(): Promise<User[]> {
+    if (!this.pool) {
+      await this.connect();
+    }
+    
+    try {
+      const [rows] = await this.pool!.query(
+        'SELECT * FROM users ORDER BY created_at DESC'
+      ) as [any[], mysql.FieldPacket[]];
+      
+      return rows.map(row => this.mapUserFromDb(row));
+    } catch (error) {
+      console.error('Error finding all users:', error);
+      return [];
     }
   }
   

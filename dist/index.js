@@ -24,6 +24,7 @@ const default_1 = require("./config/default");
 const routes_1 = require("./routes");
 const middleware_1 = require("./middleware");
 const db_1 = require("./adapters/db");
+const services_1 = require("./services");
 // Load environment variables
 dotenv_1.default.config();
 class AuthX {
@@ -38,6 +39,10 @@ class AuthX {
         this.app.use(express_1.default.json());
         // Initialize database adapter
         const dbAdapter = (0, db_1.getDbAdapter)(this.config);
+        // Initialize services
+        this.authService = new services_1.AuthService(this.config, dbAdapter);
+        this.roleService = new services_1.RoleService(this.config, dbAdapter);
+        this.userService = new services_1.UserService(this.config, dbAdapter);
         // Initialize router
         this.router = express_1.default.Router();
         (0, routes_1.setupRoutes)(this.router, this.config, dbAdapter);
@@ -62,12 +67,31 @@ class AuthX {
     getConfig() {
         return this.config;
     }
+    /**
+     * Get auth service for customization
+     */
+    getAuthService() {
+        return this.authService;
+    }
+    /**
+     * Get role service for customization
+     */
+    getRoleService() {
+        return this.roleService;
+    }
+    /**
+     * Get user service for customization
+     */
+    getUserService() {
+        return this.userService;
+    }
 }
 exports.AuthX = AuthX;
 // Export types
 __exportStar(require("./config/types"), exports);
 __exportStar(require("./models"), exports);
 __exportStar(require("./middleware/types"), exports);
+__exportStar(require("./services"), exports);
 // Export default for compatibility
 exports.default = AuthX;
 //# sourceMappingURL=index.js.map

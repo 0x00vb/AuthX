@@ -171,6 +171,23 @@ class PostgresAdapter {
         }
     }
     /**
+     * Find all users in the system
+     */
+    async findAllUsers() {
+        const client = await this.getClient();
+        try {
+            const result = await client.query('SELECT * FROM users ORDER BY created_at DESC');
+            return result.rows.map(row => this.mapUserFromDb(row));
+        }
+        catch (error) {
+            console.error('Error finding all users:', error);
+            return [];
+        }
+        finally {
+            client.release();
+        }
+    }
+    /**
      * Update user
      */
     async updateUser(id, userData) {

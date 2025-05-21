@@ -37,6 +37,10 @@ export declare class PostgresAdapter implements DbAdapter {
      */
     getUserByEmail(email: string): Promise<User | null>;
     /**
+     * Find all users in the system
+     */
+    findAllUsers(): Promise<User[]>;
+    /**
      * Update user
      */
     updateUser(id: string, userData: UserUpdateInput): Promise<User>;

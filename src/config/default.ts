@@ -30,4 +30,9 @@ export const defaultConfig: AuthXConfig = {
   // Roles
   roles: process.env.ROLES ? process.env.ROLES.split(',') : ['user', 'admin'],
   defaultRole: process.env.DEFAULT_ROLE || 'user',
+  
+  // Default empty user extensions
+  userExtensions: {
+    fields: []
+  }
 }; 

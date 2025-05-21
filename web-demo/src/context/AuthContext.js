@@ -212,10 +212,13 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       return res.data.users;
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Failed to fetch users';
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          'Failed to fetch users';
+      console.error('Error fetching users:', errorMessage);
       setError(errorMessage);
       toast.error(errorMessage);
-      throw err;
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }

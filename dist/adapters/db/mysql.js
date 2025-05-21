@@ -248,6 +248,22 @@ class MySqlAdapter {
             return false;
         }
     }
+    /**
+     * Find all users in the system
+     */
+    async findAllUsers() {
+        if (!this.pool) {
+            await this.connect();
+        }
+        try {
+            const [rows] = await this.pool.query('SELECT * FROM users ORDER BY created_at DESC');
+            return rows.map(row => this.mapUserFromDb(row));
+        }
+        catch (error) {
+            console.error('Error finding all users:', error);
+            return [];
+        }
+    }
     // Role operations
     /**
      * Create a new role

@@ -1,0 +1,83 @@
+cursor: ignoring input
+Starting AuthX server at /home/null/projects/AuthX
+Waiting for server to start...
+
+> express-auth-toolkit@0.1.0 start:dev
+> node dev-server.js
+
+Creating Ethereal test account...
+
+🔧 Email Testing Setup:
+-----------------------
+📧 Ethereal Email Account:
+- Email: s2s22l7fbsd5sgwl@ethereal.email
+- Password: sH8bvdQSStey5u9yj5
+- View emails at: https://ethereal.email
+-----------------------
+
+
+📧 Email Configuration:
+-----------------------
+Ethereal Email Test Account Created:
+- Email: s2s22l7fbsd5sgwl@ethereal.email
+- Password: sH8bvdQSStey5u9yj5
+- SMTP Host: smtp.ethereal.email
+- All verification emails will be visible at: https://ethereal.email/messages
+- Login with the credentials above to view emails
+-----------------------
+
+
+📋 Registered API Routes:
+-----------------------
+No routes registered yet.
+-----------------------
+
+
+🚀 Server running at http://localhost:3000
+🔐 AuthX API endpoints available at http://localhost:3000/api/auth
+📝 Available test pages:
+   - Home: http://localhost:3000/
+   - Register: http://localhost:3000/register
+   - Login: http://localhost:3000/login
+   - Reset Password: http://localhost:3000/reset-password
+   - Verify Email: http://localhost:3000/verify-email
+Starting React app at /home/null/projects/AuthX/test-react-app
+
+> test-react-app@0.1.0 start
+> react-scripts start
+
+Something is already running on port 3001.
+Cleaning up...
+Error: Failed to lookup view "index" in views directory "/home/null/projects/AuthX/test/views"
+    at Function.render (/home/null/projects/AuthX/node_modules/express/lib/application.js:562:17)
+    at ServerResponse.render (/home/null/projects/AuthX/node_modules/express/lib/response.js:909:7)
+    at /home/null/projects/AuthX/dev-server.js:190:9
+    at Layer.handleRequest (/home/null/projects/AuthX/node_modules/router/lib/layer.js:152:17)
+    at next (/home/null/projects/AuthX/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/null/projects/AuthX/node_modules/router/lib/route.js:117:3)
+    at handle (/home/null/projects/AuthX/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/null/projects/AuthX/node_modules/router/lib/layer.js:152:17)
+    at /home/null/projects/AuthX/node_modules/router/index.js:295:15
+    at processParams (/home/null/projects/AuthX/node_modules/router/index.js:582:12)
+Error: Failed to lookup view "index" in views directory "/home/null/projects/AuthX/test/views"
+    at Function.render (/home/null/projects/AuthX/node_modules/express/lib/application.js:562:17)
+    at ServerResponse.render (/home/null/projects/AuthX/node_modules/express/lib/response.js:909:7)
+    at /home/null/projects/AuthX/dev-server.js:190:9
+    at Layer.handleRequest (/home/null/projects/AuthX/node_modules/router/lib/layer.js:152:17)
+    at next (/home/null/projects/AuthX/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/null/projects/AuthX/node_modules/router/lib/route.js:117:3)
+    at handle (/home/null/projects/AuthX/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/null/projects/AuthX/node_modules/router/lib/layer.js:152:17)
+    at /home/null/projects/AuthX/node_modules/router/index.js:295:15
+    at processParams (/home/null/projects/AuthX/node_modules/router/index.js:582:12)
+Error: Failed to lookup view "index" in views directory "/home/null/projects/AuthX/test/views"
+    at Function.render (/home/null/projects/AuthX/node_modules/express/lib/application.js:562:17)
+    at ServerResponse.render (/home/null/projects/AuthX/node_modules/express/lib/response.js:909:7)
+    at /home/null/projects/AuthX/dev-server.js:190:9
+    at Layer.handleRequest (/home/null/projects/AuthX/node_modules/router/lib/layer.js:152:17)
+    at next (/home/null/projects/AuthX/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/null/projects/AuthX/node_modules/router/lib/route.js:117:3)
+    at handle (/home/null/projects/AuthX/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/null/projects/AuthX/node_modules/router/lib/layer.js:152:17)
+    at /home/null/projects/AuthX/node_modules/router/index.js:295:15
+    at processParams (/home/null/projects/AuthX/node_modules/router/index.js:582:12)

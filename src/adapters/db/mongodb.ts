@@ -1,12 +1,12 @@
 import { AuthXConfig } from '../../config/types';
-import { User, UserCreateInput, UserUpdateInput, Role, RoleCreateInput, RoleUpdateInput } from '../../models';
+import { User, UserCreateInput, UserUpdateInput, Role, RoleCreateInput, RoleUpdateInput, CustomUserFields } from '../../models';
 import { DbAdapter } from './adapter';
 import { MongoClient, Collection, ObjectId } from 'mongodb';
 
 /**
  * MongoDB adapter implementation
  */
-export class MongoDbAdapter implements DbAdapter {
+export class MongoDbAdapter<T extends CustomUserFields = {}> implements DbAdapter<T> {
   private config: AuthXConfig;
   private client: MongoClient | null = null;
   private usersCollection: Collection | null = null;
@@ -59,7 +59,7 @@ export class MongoDbAdapter implements DbAdapter {
   /**
    * Create a new user
    */
-  async createUser(userData: UserCreateInput): Promise<User> {
+  async createUser(userData: UserCreateInput<T>): Promise<User<T>> {
     if (!this.usersCollection) {
       await this.connect();
     }
@@ -73,7 +73,8 @@ export class MongoDbAdapter implements DbAdapter {
       roles: userData.roles || [this.config.defaultRole],
       isActive: true,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      custom: userData.custom || {} as T
     };
     
     const result = await this.usersCollection!.insertOne(newUser);
@@ -87,7 +88,7 @@ export class MongoDbAdapter implements DbAdapter {
   /**
    * Get user by ID
    */
-  async getUserById(id: string): Promise<User | null> {
+  async getUserById(id: string): Promise<User<T> | null> {
     if (!this.usersCollection) {
       await this.connect();
     }
@@ -109,7 +110,7 @@ export class MongoDbAdapter implements DbAdapter {
   /**
    * Get user by email
    */
-  async getUserByEmail(email: string): Promise<User | null> {
+  async getUserByEmail(email: string): Promise<User<T> | null> {
     if (!this.usersCollection) {
       await this.connect();
     }
@@ -126,15 +127,26 @@ export class MongoDbAdapter implements DbAdapter {
   /**
    * Update user
    */
-  async updateUser(id: string, userData: UserUpdateInput): Promise<User> {
+  async updateUser(id: string, userData: UserUpdateInput<T>): Promise<User<T>> {
     if (!this.usersCollection) {
       await this.connect();
     }
     
-    const updateData = {
+    const updateData: any = {
       ...userData,
       updatedAt: new Date()
     };
+    
+    // Handle custom fields update properly
+    if (userData.custom) {
+      // For each custom field, create a dot notation path to update nested fields
+      Object.entries(userData.custom).forEach(([key, value]) => {
+        updateData[`custom.${key}`] = value;
+      });
+      
+      // Remove the original custom object as we've flattened it
+      delete updateData.custom;
+    }
     
     const result = await this.usersCollection!.findOneAndUpdate(
       { _id: new ObjectId(id) },
@@ -160,6 +172,26 @@ export class MongoDbAdapter implements DbAdapter {
     const result = await this.usersCollection!.deleteOne({ _id: new ObjectId(id) });
     
     return result.deletedCount === 1;
+  }
+  
+  /**
+   * Find all users in the system
+   */
+  async findAllUsers(): Promise<User<T>[]> {
+    if (!this.usersCollection) {
+      await this.connect();
+    }
+    
+    try {
+      const users = await this.usersCollection!.find()
+        .sort({ createdAt: -1 })
+        .toArray();
+      
+      return users.map(user => this.mapUserFromDb(user));
+    } catch (error) {
+      console.error('Error finding all users:', error);
+      return [];
+    }
   }
   
   // Role operations
@@ -351,7 +383,7 @@ export class MongoDbAdapter implements DbAdapter {
   /**
    * Get user by reset token
    */
-  async getUserByResetToken(token: string): Promise<User | null> {
+  async getUserByResetToken(token: string): Promise<User<T> | null> {
     if (!this.usersCollection) {
       await this.connect();
     }
@@ -371,7 +403,7 @@ export class MongoDbAdapter implements DbAdapter {
   /**
    * Get user by verification token
    */
-  async getUserByVerificationToken(token: string): Promise<User | null> {
+  async getUserByVerificationToken(token: string): Promise<User<T> | null> {
     if (!this.usersCollection) {
       await this.connect();
     }
@@ -388,11 +420,12 @@ export class MongoDbAdapter implements DbAdapter {
   /**
    * Map MongoDB document to User model
    */
-  private mapUserFromDb(dbUser: any): User {
-    const { _id, ...userData } = dbUser;
+  private mapUserFromDb(dbUser: any): User<T> {
+    const { _id, ...rest } = dbUser;
     return {
       id: _id.toString(),
-      ...userData
+      ...rest,
+      custom: rest.custom || {} as T
     };
   }
   

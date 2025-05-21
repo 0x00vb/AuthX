@@ -79,11 +79,17 @@ app.get('/api/users',
   authX.middleware.hasRole('admin'),
   async (req, res) => {
     try {
-      const dbAdapter = authX.getConfig().dbAdapter;
-      const users = await dbAdapter.findAllUsers();
+      // Use the UserService instead of directly accessing the database adapter
+      const userService = authX.getUserService();
+      
+      const users = await userService.getAllUsers();
       res.json({ users });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch users', error: error.message });
+      console.error('Error in /api/users:', error);
+      res.status(500).json({
+        message: 'Failed to fetch users',
+        error: error.message || 'Unknown error occurred'
+      });
     }
   }
 );

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { Card, Table, Button, Badge, Modal, Form, Spinner } from 'react-bootstrap';
 import AuthContext from '../../context/AuthContext';
 
@@ -7,6 +7,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [fetchFailed, setFetchFailed] = useState(false);
   
   // Role management state
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -17,24 +18,36 @@ const UserManagement = () => {
   // Available roles
   const availableRoles = ['client', 'mechanic', 'admin'];
 
-  // Fetch users on component mount
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const userData = await getAllUsers();
-        setUsers(userData || []);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch users');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch users on component mount using useCallback to prevent infinite re-renders
+  const fetchUsers = useCallback(async () => {
+    // If we've already failed once, don't keep retrying automatically
+    if (fetchFailed) return;
+    
+    try {
+      setLoading(true);
+      const userData = await getAllUsers();
+      setUsers(userData || []);
+      setError(null);
+      setFetchFailed(false);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError(err.message || 'Failed to fetch users');
+      setFetchFailed(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [getAllUsers, fetchFailed]);
 
+  // Use useEffect with the callback
+  useEffect(() => {
     fetchUsers();
-  }, [getAllUsers]);
+  }, [fetchUsers]);
+
+  // Retry button handler
+  const handleRetry = () => {
+    setFetchFailed(false);
+    fetchUsers();
+  };
 
   // Open role assignment modal
   const handleOpenRoleModal = (user) => {
@@ -124,7 +137,14 @@ const UserManagement = () => {
             </div>
           ) : error ? (
             <div className="alert alert-danger m-3">
-              {error}
+              <p>{error}</p>
+              <Button 
+                variant="outline-primary" 
+                size="sm"
+                onClick={handleRetry}
+              >
+                Retry
+              </Button>
             </div>
           ) : users.length === 0 ? (
             <div className="alert alert-info m-3">
@@ -213,51 +233,20 @@ const UserManagement = () => {
         <Modal.Body>
           {selectedUser && (
             <>
-              <p>
-                Assign a role to user: <strong>{selectedUser.firstName} {selectedUser.lastName}</strong>
-              </p>
-              
+              <p><strong>User:</strong> {selectedUser.firstName} {selectedUser.lastName}</p>
+              <p><strong>Current Roles:</strong> {selectedUser.roles.join(', ')}</p>
               <Form.Group className="mb-3">
-                <Form.Label>Select Role</Form.Label>
+                <Form.Label>Select Role to Assign:</Form.Label>
                 <Form.Select 
                   value={selectedRole} 
                   onChange={(e) => setSelectedRole(e.target.value)}
                 >
                   <option value="">Select a role...</option>
-                  {availableRoles
-                    .filter(role => !selectedUser.roles?.includes(role))
-                    .map((role) => (
-                      <option key={role} value={role}>
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
-                      </option>
-                    ))}
+                  {availableRoles.filter(role => !selectedUser.roles.includes(role)).map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
                 </Form.Select>
               </Form.Group>
-              
-              <div className="mb-3">
-                <Form.Label>Current Roles:</Form.Label>
-                <div>
-                  {selectedUser.roles?.length > 0 ? (
-                    selectedUser.roles.map((role) => (
-                      <Badge 
-                        key={role} 
-                        bg={
-                          role === 'admin' 
-                            ? 'danger' 
-                            : role === 'mechanic' 
-                              ? 'success' 
-                              : 'info'
-                        }
-                        className="me-1"
-                      >
-                        {role}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted">No roles assigned</span>
-                  )}
-                </div>
-              </div>
             </>
           )}
         </Modal.Body>
@@ -272,19 +261,10 @@ const UserManagement = () => {
           >
             {roleAssignLoading ? (
               <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                  className="me-2"
-                />
-                Assigning...
+                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                <span className="ms-2">Assigning...</span>
               </>
-            ) : (
-              'Assign Role'
-            )}
+            ) : 'Assign Role'}
           </Button>
         </Modal.Footer>
       </Modal>

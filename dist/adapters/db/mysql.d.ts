@@ -41,6 +41,10 @@ export declare class MySqlAdapter implements DbAdapter {
      */
     deleteUser(id: string): Promise<boolean>;
     /**
+     * Find all users in the system
+     */
+    findAllUsers(): Promise<User[]>;
+    /**
      * Create a new role
      */
     createRole(roleData: RoleCreateInput): Promise<Role>;
